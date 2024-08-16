@@ -452,6 +452,23 @@ if __name__ == "__main__":
     assert out == '(((s + \'lit\') > 1) and (not b))', out
     out = parser.build_sql('1 + i / f > -0.1', columns=columns)
     assert out == '((1 + (i / f)) > (- 0.1))', out
+    
+    print("--- testing sql builder errors ---")
+    threw = None
+    try:
+        parser.build_sql('1 - s = f', columns=columns)
+    except TypecheckError as e:
+        threw = e
+    assert threw is not None and str(threw) == 'expected integer, got varchar', f'Expected exception, got {threw}'
+
+    print("--- railroad diagram ---")
+    try:
+        from pyparsing.diagram import to_railroad
+        railroad = to_railroad(parser._parser)
+        with open("railroad.svg", "w") as f:
+            railroad[0].diagram.writeSvg(f.write)
+    except ImportError:
+        print("pyparsing must be installed with [diagrams] to generate railroad diagram")
 
     print("----- Passed -----")
  
